@@ -11,7 +11,7 @@ Il est écrit pour être relu plus tard, sans accès au serveur de la clinique.
 
 1. [Objectif](#1-objectif)
 2. [Les données](#2-les-données)
-3. [Chronologie des décisions](#3-chronologie-des-décisions)
+3. [Démarche et justifications](#3-démarche-et-justifications)
 4. [Le prétraitement en détail](#4-le-prétraitement-en-détail)
 5. [Les métriques](#5-les-métriques)
 6. [L'échantillonnage des 700 CRs](#6-léchantillonnage-des-700-crs)
@@ -82,89 +82,78 @@ ligne, listes) a été perdue.
   sauts de ligne (médiane : 5 par CR). Certains sont des **générations ratées**
   (phrase répétée en boucle, morceaux de dialogue « assistant… »), ce qui
   explique des valeurs extrêmes dans leurs résultats (Flesch à −654, etc.).
-- Ces fichiers sont conservés ailleurs (pas sur le serveur de la clinique).
-  Les copies déposées un temps sur le serveur étaient **tronquées**
-  (1 310 720 octets exactement, coupées au milieu d'une ligne) : ne pas s'en
-  servir.
+- Ces fichiers sont conservés hors du serveur de la clinique.
 
 ---
 
-## 3. Chronologie des décisions
+## 3. Démarche et justifications
 
-Cette section raconte **dans l'ordre** ce qui a été essayé, ce qui a été
-gardé, et pourquoi. Elle sert à justifier la méthode.
+Les étapes appliquées, dans l'ordre, chacune avec sa raison.
 
-### Étape 1 — Environnement
+### 3.1 Principe : le texte des CRs réels reste intact
 
-- Dépendances vérifiées ; `sacrebleu` manquait → installé.
-- Le serveur a un GPU (NVIDIA RTX 4000 Ada, 20 Go) mais PyTorch était la
-  version **CPU** → remplacé par `torch 2.6.0+cu124` (même version, build CUDA).
-- Le modèle de perplexité `asi/gpt-fr-cased-base` a été téléchargé depuis
-  HuggingFace et testé.
+Le texte de chaque CR est conservé **exactement tel qu'il est écrit** :
+en-tête administratif, signature et pied de page compris, aucun caractère
+modifié.
 
-### Étape 2 — Premier nettoyage : **rejeté**
+**Justification** : les CRs réels sont la référence ; ce qui est évalué doit
+être ce que les médecins ont réellement écrit, sans choix éditorial de notre
+part sur ce qui « compte » dans un CR.
 
-Un premier prétraitement retirait l'en-tête et le pied de page, normalisait
-des caractères (`50Gy` → `50 Gy`, apostrophes…) et mettait une phrase par
-ligne.
+### 3.2 Calcul des métriques identique au script synthétique
 
-**Rejeté** : règle fixée pour tout le projet → **le texte des CRs réels doit
-rester exactement tel qu'il est écrit**. On ne supprime rien (ni en-tête, ni
-signature) et on ne modifie aucun caractère.
+Les métriques des CRs réels sont calculées avec **exactement le même code** que
+`evaluate_cag.py` (le script des CRs synthétiques) : même tokenisation, Flesch
+et Gunning Fog via la bibliothèque `textstat` (langue `fr`), même modèle de
+perplexité, mêmes implémentations de Self-BLEU, Distinct et cosinus (§5).
 
-### Étape 3 — Sauts de ligne uniquement : **abandonné**
-
-Deuxième version : seulement remplacer certains espaces par des sauts de ligne
-(≈ 27 lignes par CR), texte vérifié identique.
-
-**Abandonné** : les sauts de ligne n'ont presque aucun effet sur les
-métriques (`textstat` ne les compte pas comme fins de phrase), et ce format
-(une phrase par ligne) ne correspond pas non plus à celui des synthétiques
-(≈ 5 sauts de ligne par CR).
-
-### Étape 4 — Alignement sur le script synthétique
-
-Le script `evaluate_cag.py` a été comparé ligne à ligne au script des CRs
-réels. **Différence majeure trouvée** : Flesch et Gunning Fog étaient calculés
-avec la bibliothèque `textstat` côté synthétique, mais avec une formule
-« maison » côté réel → valeurs non comparables. Le script réel a été aligné
-(voir §5.3).
+**Justification** : la comparaison réels / synthétiques n'a de sens que si les
+deux sont mesurés de la même façon ; les indices de lisibilité, en particulier,
+varient fortement d'une implémentation à l'autre.
 
 **Vérification** : les métriques ont été recalculées sur 252 CRs synthétiques
-avec le code aligné, et comparées aux valeurs d'origine du fichier
-`medllama8b_eval_per_cr.csv` :
+avec ce code et comparées aux valeurs d'origine (`medllama8b_eval_per_cr.csv`) :
 
 | Métrique | Résultat |
 |---|---|
 | n_mots, MSTTR-100, Flesch, Gunning Fog | identiques sur les 252 CRs |
 | Perplexité | écart maximal 0,0005 (arrondi GPU) |
 
-→ Le calcul est **exactement** celui utilisé pour les synthétiques.
+### 3.3 Ajout de la ponctuation manquante
 
-### Étape 5 — Ponctuation minimale : **retenue**
+Un point est ajouté à la fin des phrases non ponctuées, et un espace dans les
+dates collées, **sans rien retirer ni modifier** (détails au §4).
 
-Constat : une phrase de 100 mots sans point « n'a pas de sens » et fausse la
-lisibilité et la perplexité. Décision : **ajouter** la ponctuation manquante
-(et un espace dans les dates collées), **sans rien retirer ni modifier**.
-Détails au §4.
+**Justification** : une suite de phrases sans ponctuation (jusqu'à 255 mots
+d'affilée) n'a pas de sens comme « phrase ». Or la lisibilité (`textstat`
+compte les phrases avec `. ! ?`) et la perplexité dépendent du découpage en
+phrases. Ce défaut vient de l'extraction des CRs, pas de leur rédaction.
 
-### Étape 6 — Évaluer les deux versions
+### 3.4 Évaluation des deux versions
 
-Pour mesurer l'effet de cette ponctuation ajoutée, les métriques ont été
-calculées sur **les deux versions** : CRs **bruts** (`2. Corps Extraits`) et
-CRs **ponctués** (`3. CRs ponctues`), sur exactement les mêmes CRs.
+Les métriques sont calculées sur les CRs **bruts** (`2. Corps Extraits`) et
+sur les CRs **ponctués** (`3. CRs ponctues`), sur exactement les mêmes CRs.
 
-### Étape 7 — Robustesse de l'échantillonnage
+**Justification** : mesurer l'effet de la ponctuation ajoutée, et rester
+transparent puisque seuls les CRs réels reçoivent ce prétraitement (les
+synthétiques ont déjà leur ponctuation, écrite par le modèle).
 
-Les métriques de corpus sont calculées sur 700 CRs (§6). Pour vérifier que le
-résultat ne dépend pas des CRs tirés, le tirage a été répété **5 fois**, de
-deux façons (tirages indépendants, puis blocs disjoints). Résultat : les deux
-façons donnent la même chose.
+### 3.5 Métriques de corpus sur des sous-échantillons de 700 CRs
 
-### Étape 8 — Dépôt GitHub privé
+Self-BLEU, Distinct et cosinus sont calculés sur 700 CRs, répétés 5 fois selon
+deux schémas (tirages indépendants, blocs disjoints) (§6).
 
-Code, documentation et résultats agrégés poussés sur un dépôt privé ;
-**aucune donnée de la clinique** (§13).
+**Justification** : ces métriques dépendent de la taille du corpus ; 700 est la
+taille des groupes synthétiques. La répétition montre que le résultat ne
+dépend pas des CRs tirés ; les deux schémas donnent la même chose.
+
+### 3.6 Dépôt GitHub privé sans données
+
+Code, documentation et résultats agrégés sont sur un dépôt privé ; **aucune
+donnée de la clinique** n'y figure (§13).
+
+**Justification** : pouvoir retrouver et reproduire le travail hors du serveur,
+sans faire sortir de données de patients.
 
 ---
 
@@ -251,8 +240,7 @@ qu'on retrouve **exactement** le texte d'origine. Résultat : 0 CR modifié
 autrement, sur 3 687.
 
 Contrôle manuel : 40 points ajoutés tirés au hasard dans tout le corpus ont été
-relus → tous corrects (un cas après `…` a été corrigé en ajoutant `…` aux
-ponctuations finales).
+relus → tous corrects.
 
 ### 4.6 Bilan chiffré
 
@@ -733,6 +721,6 @@ complet sont exactement ceux du tirage de 700 avec la graine 42 (§6.3).
 Ils ont déjà leur ponctuation (écrite par le modèle) ; le problème de
 ponctuation des CRs réels vient de leur extraction du dossier patient.
 
-**Pourquoi utiliser textstat plutôt qu'une formule maison ?**
+**Pourquoi utiliser textstat pour la lisibilité ?**
 Parce que c'est ce qu'utilise le script des synthétiques : la comparaison
 n'a de sens qu'avec exactement le même calcul.

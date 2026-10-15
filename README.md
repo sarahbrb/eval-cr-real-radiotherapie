@@ -7,7 +7,7 @@ clinique, pour les comparer aux CRs synthétiques générés par LLM (pipeline C
 > résultats par CR (dont les noms de fichiers contiennent des identifiants)
 > et les journaux sont exclus par le `.gitignore` (liste blanche).
 
-📖 **Toutes les explications** (chronologie des décisions, prétraitement règle
+📖 **Toutes les explications** (démarche et justifications, prétraitement règle
 par règle, formules des métriques, échantillonnage, résultats complets,
 interprétation, limites, questions fréquentes) :
 [`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md).
