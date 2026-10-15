@@ -1,4 +1,4 @@
-# Évaluation linguistique des CRs de radiothérapie réels et synthétiques
+# Évaluation linguistique des CRs de radiothérapie réels
 
 Métriques linguistiques calculées sur les comptes rendus (CRs) réels de la
 clinique, pour les comparer aux CRs synthétiques générés par LLM (pipeline CAG).
