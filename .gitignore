@@ -1,0 +1,31 @@
+# ───────────────────────────────────────────────────────────────────────────────
+# DONNÉES DE LA CLINIQUE : NE JAMAIS VERSIONNER
+# Liste blanche : tout est ignoré par défaut, seuls les fichiers autorisés
+# ci-dessous sont versionnés. Un nouveau fichier à la racine reste donc ignoré
+# tant qu'il n'est pas ajouté explicitement ici.
+# ───────────────────────────────────────────────────────────────────────────────
+/*
+
+!/.gitignore
+!/README.md
+!/requirements.txt
+!/scripts/
+!/results/
+
+# Résultats : uniquement les agrégats. Les fichiers par CR (results_brut.csv,
+# results_ponctues.csv) contiennent les noms de fichiers des CRs (identifiants,
+# médecins, dates) : exclus.
+/results/*
+!/results/results_brut_summary.csv
+!/results/results_ponctues_summary.csv
+!/results/corpus_seeds.csv
+!/results/corpus_seeds_summary.csv
+!/results/corpus_folds.csv
+!/results/corpus_folds_summary.csv
+
+# Sécurité supplémentaire, où que soient ces fichiers
+*.txt
+!/requirements.txt
+*.jsonl
+*.log
+__pycache__/

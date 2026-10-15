@@ -1,0 +1,12 @@
+# Versions used for the evaluation (Python 3.9)
+# GPU: install the CUDA build of torch, e.g.
+#   pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0
+transformers==4.25.1
+pandas==1.5.3
+numpy==1.21.2
+scikit-learn==1.0.2
+scipy==1.9.1
+sacrebleu==2.6.0
+textstat==0.7.13
+pyphen==0.17.2
