@@ -11,6 +11,7 @@
 !/requirements.txt
 !/scripts/
 !/results/
+!/docs/
 
 # Résultats : uniquement les agrégats. Les fichiers par CR (eval_bruts_graine42.csv,
 # eval_ponctues_graine42.csv) contiennent les noms de fichiers des CRs

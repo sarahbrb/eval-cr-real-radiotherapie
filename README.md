@@ -7,9 +7,16 @@ clinique, pour les comparer aux CRs synthétiques générés par LLM (pipeline C
 > résultats par CR (dont les noms de fichiers contiennent des identifiants)
 > et les journaux sont exclus par le `.gitignore` (liste blanche).
 
+📖 **Toutes les explications** (chronologie des décisions, prétraitement règle
+par règle, formules des métriques, échantillonnage, résultats complets,
+interprétation, limites, questions fréquentes) :
+[`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md).
+
 ## Organisation
 
 ```
+docs/
+  DOCUMENTATION.md          explications complètes de tout le travail
 scripts/
   punctuate_reports.py      prétraitement : ajout des points et espaces manquants
   evaluate_real_reports.py  métriques par CR + métriques de corpus (1 graine)
@@ -67,8 +74,9 @@ synthétiques) :
   - *indépendants* : 5 tirages sans remise avec les graines 42 à 46 ; deux
     tirages peuvent partager des CRs (≈ 134 en commun ; 2 399 CRs distincts
     utilisés) ;
-  - *disjoints* : les CRs sont mélangés une fois (graine 42) puis découpés en
-    5 blocs de 700 sans CR commun (3 500 CRs utilisés sur 3 687).
+  - *disjoints* : les CRs sont mélangés une fois (graine 42, la même pour tous
+    les blocs) puis découpés en 5 blocs de 700 (`fold` 1 à 5) sans CR commun
+    (3 500 CRs utilisés sur 3 687).
 
   Une même graine sélectionne les mêmes CRs dans les versions brute et ponctuée.
 
