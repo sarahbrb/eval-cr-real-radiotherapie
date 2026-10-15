@@ -15,13 +15,19 @@ scripts/
   evaluate_real_reports.py  métriques par CR + métriques de corpus (1 graine)
   corpus_metrics_seeds.py   métriques de corpus sur plusieurs graines
 results/
-  results_brut_summary.csv      CRs réels tels qu'extraits
-  results_ponctues_summary.csv  CRs réels après ajout de la ponctuation
-  corpus_seeds.csv              métriques de corpus, 5 tirages indépendants × 2 versions
-  corpus_seeds_summary.csv      moyenne ± écart-type sur les 5 tirages indépendants
-  corpus_folds.csv              métriques de corpus, 5 tirages disjoints × 2 versions
-  corpus_folds_summary.csv      moyenne ± écart-type sur les 5 tirages disjoints
+  eval_bruts_graine42_summary.csv                métriques par CR (moyenne ± écart-type sur
+                                                 les 3 687 CRs) + corpus (graine 42), CRs bruts
+  eval_ponctues_graine42_summary.csv             idem, CRs ponctués
+  corpus_independants_graines42-46.csv           métriques de corpus, 1 ligne par tirage
+                                                 indépendant (graines 42 à 46) × 2 versions
+  corpus_independants_graines42-46_summary.csv   moyenne ± écart-type sur ces 5 tirages
+  corpus_disjoints_melange42_5blocs.csv          métriques de corpus, 1 ligne par bloc
+                                                 disjoint (mélange graine 42) × 2 versions
+  corpus_disjoints_melange42_5blocs_summary.csv  moyenne ± écart-type sur ces 5 blocs
 ```
+
+Convention de nommage : `bruts` = CRs tels qu'extraits, `ponctues` = après
+prétraitement ; `_summary` = agrégat (moyenne ± écart-type).
 
 Non versionnés (à placer localement) : `2. Corps Extraits/` (3 687 CRs réels,
 un `.txt` UTF-8 par CR) et `3. CRs ponctues/` (sortie du prétraitement).
@@ -74,14 +80,14 @@ pip install -r requirements.txt
 python scripts/punctuate_reports.py --input_dir "2. Corps Extraits" --output_dir "3. CRs ponctues"
 
 python scripts/evaluate_real_reports.py --input_dir "2. Corps Extraits" \
-    --output results/results_brut.csv --device cuda --sample_n 700 --seed 42
+    --output results/eval_bruts_graine42.csv --device cuda --sample_n 700 --seed 42
 python scripts/evaluate_real_reports.py --input_dir "3. CRs ponctues" \
-    --output results/results_ponctues.csv --device cuda --sample_n 700 --seed 42
+    --output results/eval_ponctues_graine42.csv --device cuda --sample_n 700 --seed 42
 
 python scripts/corpus_metrics_seeds.py --input_dirs "2. Corps Extraits" "3. CRs ponctues" \
-    --seeds 42 43 44 45 46 --sample_n 700 --output results/corpus_seeds.csv
+    --seeds 42 43 44 45 46 --sample_n 700 --output results/corpus_independants_graines42-46.csv
 python scripts/corpus_metrics_seeds.py --mode disjoint --input_dirs "2. Corps Extraits" "3. CRs ponctues" \
-    --split_seed 42 --n_folds 5 --sample_n 700 --output results/corpus_folds.csv
+    --split_seed 42 --n_folds 5 --sample_n 700 --output results/corpus_disjoints_melange42_5blocs.csv
 ```
 
 Sous Windows, définir `PYTHONIOENCODING=utf-8` si la sortie est redirigée.

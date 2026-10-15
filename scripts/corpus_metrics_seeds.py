@@ -20,10 +20,12 @@ they hold the same file names (e.g. raw vs punctuated reports).
 Usage:
     python scripts/corpus_metrics_seeds.py \\
         --input_dirs "2. Corps Extraits" "3. CRs ponctues" \\
-        --seeds 42 43 44 45 46 --sample_n 700 --output results/corpus_seeds.csv
+        --seeds 42 43 44 45 46 --sample_n 700 \\
+        --output results/corpus_independants_graines42-46.csv
     python scripts/corpus_metrics_seeds.py --mode disjoint \\
         --input_dirs "2. Corps Extraits" "3. CRs ponctues" \\
-        --split_seed 42 --n_folds 5 --sample_n 700 --output results/corpus_folds.csv
+        --split_seed 42 --n_folds 5 --sample_n 700 \\
+        --output results/corpus_disjoints_melange42_5blocs.csv
 """
 
 import argparse

@@ -12,16 +12,16 @@
 !/scripts/
 !/results/
 
-# Résultats : uniquement les agrégats. Les fichiers par CR (results_brut.csv,
-# results_ponctues.csv) contiennent les noms de fichiers des CRs (identifiants,
-# médecins, dates) : exclus.
+# Résultats : uniquement les agrégats. Les fichiers par CR (eval_bruts_graine42.csv,
+# eval_ponctues_graine42.csv) contiennent les noms de fichiers des CRs
+# (identifiants, médecins, dates) : exclus.
 /results/*
-!/results/results_brut_summary.csv
-!/results/results_ponctues_summary.csv
-!/results/corpus_seeds.csv
-!/results/corpus_seeds_summary.csv
-!/results/corpus_folds.csv
-!/results/corpus_folds_summary.csv
+!/results/eval_bruts_graine42_summary.csv
+!/results/eval_ponctues_graine42_summary.csv
+!/results/corpus_independants_graines42-46.csv
+!/results/corpus_independants_graines42-46_summary.csv
+!/results/corpus_disjoints_melange42_5blocs.csv
+!/results/corpus_disjoints_melange42_5blocs_summary.csv
 
 # Sécurité supplémentaire, où que soient ces fichiers
 *.txt
